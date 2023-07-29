@@ -1,0 +1,67 @@
+[gd_scene load_steps=7 format=3 uid="uid://c7bbay3dm68e"]
+
+[ext_resource type="Texture2D" uid="uid://elowvambydw3" path="res://Assets/Prototype Textures/Dark/texture_04.png" id="1_4254g"]
+[ext_resource type="PackedScene" uid="uid://jykyjhke4ta7" path="res://Object/Player.tscn" id="2_5gx0u"]
+[ext_resource type="Texture2D" uid="uid://b0shdvkwr4lno" path="res://Assets/Prototype Textures/Orange/texture_09.png" id="3_plp0q"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jdcl8"]
+albedo_texture = ExtResource("1_4254g")
+uv1_triplanar = true
+
+[sub_resource type="Environment" id="Environment_i1w7y"]
+background_mode = 1
+background_color = Color(0.6, 0.803922, 0.956863, 1)
+tonemap_mode = 3
+tonemap_exposure = 1.2
+sdfgi_enabled = true
+sdfgi_energy = 0.9
+volumetric_fog_density = 0.02
+volumetric_fog_albedo = Color(0.466, 0.731433, 0.930166, 1)
+volumetric_fog_length = 500.0
+adjustment_contrast = 1.2
+adjustment_saturation = 1.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yye2j"]
+albedo_texture = ExtResource("3_plp0q")
+uv1_triplanar = true
+
+[node name="World" type="Node3D"]
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+material_override = SubResource("StandardMaterial3D_jdcl8")
+use_collision = true
+size = Vector3(500, 1, 500)
+metadata/_edit_lock_ = true
+
+[node name="Player" parent="." instance=ExtResource("2_5gx0u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 10, 5)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_i1w7y")
+
+[node name="House" type="CSGCombiner3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 2, -14)
+material_override = SubResource("StandardMaterial3D_yye2j")
+use_collision = true
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="CSGBox3D" type="CSGBox3D" parent="House"]
+size = Vector3(5, 4, 4)
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="House"]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+operation = 2
+radius = 1.0
+height = 5.0
+sides = 32
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="House"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+operation = 2
+size = Vector3(5, 2, 2)

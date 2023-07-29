@@ -1,0 +1,129 @@
+[gd_scene load_steps=16 format=3 uid="uid://jykyjhke4ta7"]
+
+[ext_resource type="Script" path="res://Scripts/Player/PlayerController.gd" id="1_je70d"]
+[ext_resource type="Script" path="res://Scripts/Player/UserInput.gd" id="4_7ffje"]
+[ext_resource type="Script" path="res://Scripts/Player/Gravity.gd" id="5_f63e5"]
+[ext_resource type="Script" path="res://Scripts/Player/Stamina.gd" id="6_akrye"]
+[ext_resource type="Script" path="res://Scripts/StateMachine.gd" id="7_s4cxt"]
+[ext_resource type="Script" path="res://Scripts/States/Idle.gd" id="8_u0hdg"]
+[ext_resource type="Script" path="res://Scripts/States/Walk.gd" id="9_x17r1"]
+[ext_resource type="Script" path="res://Scripts/States/Jump.gd" id="10_gwmi7"]
+[ext_resource type="Script" path="res://Scripts/States/Sprint.gd" id="11_se6uh"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hpt7t"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_wtmip"]
+
+[sub_resource type="Animation" id="Animation_awqak"]
+resource_name = "Idle"
+length = 2.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Body/Head:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0.5, 0), Vector3(0, 0.52, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_brkf8"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Body/Head:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0.5, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_0ah6o"]
+resource_name = "Walk"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Body/Head:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0.5, 0), Vector3(0, 0.55, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1my2p"]
+_data = {
+"Idle": SubResource("Animation_awqak"),
+"RESET": SubResource("Animation_brkf8"),
+"Walk": SubResource("Animation_0ah6o")
+}
+
+[node name="Player" type="CharacterBody3D" groups=["Player"]]
+collision_layer = 2
+collision_mask = 7
+script = ExtResource("1_je70d")
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_hpt7t")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("CapsuleMesh_wtmip")
+
+[node name="Body" type="Marker3D" parent="."]
+
+[node name="Head" type="Marker3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="Camera" type="Camera3D" parent="Body/Head"]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_1my2p")
+}
+blend_times = [&"Walk", &"Idle", 0.4, &"Idle", &"Walk", 0.4]
+
+[node name="UserInput" type="Node" parent="."]
+script = ExtResource("4_7ffje")
+
+[node name="Gravity" type="Node" parent="."]
+script = ExtResource("5_f63e5")
+
+[node name="Stamina" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("6_akrye")
+
+[node name="TimeToRestoreStamina" type="Timer" parent="Stamina"]
+wait_time = 4.0
+one_shot = true
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("init_state")]
+unique_name_in_owner = true
+script = ExtResource("7_s4cxt")
+init_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("8_u0hdg")
+
+[node name="Walk" type="Node" parent="StateMachine"]
+script = ExtResource("9_x17r1")
+
+[node name="Jump" type="Node" parent="StateMachine"]
+script = ExtResource("10_gwmi7")
+
+[node name="Sprint" type="Node" parent="StateMachine"]
+script = ExtResource("11_se6uh")
+
+[connection signal="timeout" from="Stamina/TimeToRestoreStamina" to="Stamina" method="_on_time_to_restore_stamina_timeout"]
